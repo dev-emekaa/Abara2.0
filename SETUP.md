@@ -47,11 +47,12 @@ Stop with `docker compose down` (add `-v` to wipe the dev DB volume).
 3. Put it in `.env`:
    ```
    GEMINI_API_KEY="your-key-here"
-   GEMINI_MODEL="gemini-1.5-flash"
+   GEMINI_MODEL="gemini-2.5-flash"
    ```
-4. Model string: use **`gemini-1.5-flash`** (fast, free-tier friendly). If the
-   key is missing or rate-limited, the Care Companion falls back to a safe
-   canned reply that still respects the escalation rule.
+4. Model string: use **`gemini-2.5-flash`** (fast, capable, free-tier friendly).
+   Confirm it's listed for your key in Google AI Studio. If the key is missing,
+   rate-limited, or the model name isn't accepted, the Care Companion falls back
+   to a safe canned reply that still respects the escalation rule.
 
 > Keep prompts short to conserve the free quota. All Gemini calls are
 > server-side only — the key never reaches the browser.
