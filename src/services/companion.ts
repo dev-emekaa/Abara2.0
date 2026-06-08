@@ -40,15 +40,16 @@ export function buildSystemPrompt(ctx: CompanionContext): string {
 }
 
 /**
- * Safe, non-diagnostic replies used when Gemini is unavailable (missing key,
- * rate-limited, or errored). Rotated by turn so it doesn't feel robotic. These
- * still respect the safety boundary.
+ * Replies used ONLY when Gemini is unavailable (missing key, rate-limited, or
+ * errored). They must never assume anything about the user's situation — a
+ * canned "keep taking your medication" in reply to "I broke my leg" is worse
+ * than useless. So these honestly acknowledge the hiccup and reinforce the
+ * safety boundary instead of inventing advice.
  */
 export const FALLBACK_REPLIES: readonly string[] = [
-  "Thanks for letting me know — that really helps. A few days of feeling low after an illness is common while your body recovers. Are you still able to eat and drink okay?",
-  "Good to hear. Keep finishing your full course even now that you feel better — that's what stops things coming back. Want me to log this check-in on your timeline?",
-  "Glad you're resting. I'll check in again in a couple of days. If anything changes — especially if you feel worse — tell me right away and I'll bring in a doctor.",
-  "I hear you. Keep being kind to yourself today. If a new symptom shows up or something worries you, say the word and I'll connect you with a doctor.",
+  "Thanks for telling me. I'm having trouble responding fully just now — please try again in a moment. And if anything feels severe or is getting worse, contact a doctor straight away.",
+  "I hear you, and I want to give this a proper answer — but I can't reach my assistant right now. Please try again shortly. If you're worried or things are getting worse, please reach a doctor.",
+  "Sorry, I'm having a brief technical hiccup and can't reply properly right now. Give it another try in a moment. If this feels serious, don't wait for me — contact a doctor.",
 ];
 
 export function pickFallbackReply(turnIndex: number): string {
