@@ -32,6 +32,7 @@ async function buildContext(
     specialty: consult?.specialty ?? "General Practice",
     doctorName: consult?.doctorName ?? "your doctor",
     daysSinceConsult: consult ? daysBetween(consult.createdAt, now) : 0,
+    hasConsult: !!consult,
   };
 }
 

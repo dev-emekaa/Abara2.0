@@ -12,6 +12,7 @@ const ctx = {
   specialty: "General Practice",
   doctorName: "Dr. Ngozi Eze",
   daysSinceConsult: 4,
+  hasConsult: true,
 };
 
 describe("planCompanionReply", () => {
@@ -80,5 +81,12 @@ describe("prompts", () => {
     const opener = buildOpenerText(ctx);
     expect(opener).toContain("Chidinma");
     expect(opener).toContain("4 days");
+  });
+
+  it("opener welcomes a new user with no consult (no fake history)", () => {
+    const opener = buildOpenerText({ ...ctx, hasConsult: false });
+    expect(opener).toMatch(/welcome/i);
+    expect(opener).not.toContain("4 days");
+    expect(opener).not.toContain("Dr. Ngozi Eze");
   });
 });

@@ -18,7 +18,8 @@ describe("companion thread", () => {
     });
     expect(messages).toHaveLength(1);
     expect(messages[0].role).toBe("AI");
-    expect(messages[0].content.toLowerCase()).toContain("how are you feeling");
+    // Test users have no consult on record → the welcome opener (no fake history).
+    expect(messages[0].content.toLowerCase()).toContain("welcome to abara");
   });
 
   it("reuses the existing thread instead of creating a new one", async () => {

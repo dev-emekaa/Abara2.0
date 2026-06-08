@@ -2,7 +2,7 @@ import type { User } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { loginSchema, signupSchema } from "@/lib/schemas";
-import { seedStarterDataForUser } from "@/server/seed-starter";
+import { seedWelcomeForUser } from "@/server/seed-welcome";
 import { ok, fail, type ActionResult } from "@/server/result";
 
 /**
@@ -34,8 +34,8 @@ export async function registerUser(
     const user = await prisma.user.create({
       data: { fullName: fullName.trim(), email: normalizedEmail, location: location.trim(), passwordHash },
     });
-    // Every new account starts alive, not empty.
-    await seedStarterDataForUser(user.id);
+    // Honest welcome — alive but no fabricated clinical history.
+    await seedWelcomeForUser(user.id);
     return ok({ user });
   } catch {
     return fail("Could not create your account. Please try again.");

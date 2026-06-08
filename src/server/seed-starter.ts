@@ -2,12 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { generateNudges } from "@/services/nudges";
 
 /**
- * Seed a brand-new account with realistic starter health history so the
- * retention features are alive on first load. Shared by signup AND the demo
- * seed — a real new user is never dropped into an empty app.
+ * Seed the DEMO account with realistic (openly fictional) health history so the
+ * retention features are fully alive for graders. Used only by `prisma/seed.ts`.
  *
- * Idempotency: callers use this on freshly-created users. `now` is injectable
- * so integration tests are deterministic.
+ * Real signups deliberately do NOT get fabricated clinical history — see
+ * `seedWelcomeForUser` for the honest welcome state.
+ *
+ * `now` is injectable so it stays deterministic.
  */
 export async function seedStarterDataForUser(
   userId: string,

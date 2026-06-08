@@ -11,18 +11,26 @@ export interface CompanionContext {
   specialty: string;
   doctorName: string;
   daysSinceConsult: number;
+  /** False for a brand-new user who has no consultation on record yet. */
+  hasConsult: boolean;
 }
 
 /** The proactive opening check-in shown when a thread is first created. */
 export function buildOpenerText(ctx: CompanionContext): string {
+  if (!ctx.hasConsult) {
+    return `Hi ${ctx.firstName} 👋 Welcome to Abara. I'm your care companion — I'll check in on how you're feeling between visits, and if anything ever sounds serious I'll help you reach a doctor. How are you doing today?`;
+  }
   return `Hi ${ctx.firstName} 👋 It's been ${ctx.daysSinceConsult} days since your ${ctx.specialty.toLowerCase()} consult with ${ctx.doctorName}. I wanted to check in — how are you feeling today? No rush, just whatever's true.`;
 }
 
 /** Short on purpose — keeps Gemini free-tier token use low. */
 export function buildSystemPrompt(ctx: CompanionContext): string {
+  const intro = ctx.hasConsult
+    ? `You are Abara's Care Companion, a warm, plain-spoken health check-in assistant for ${ctx.firstName}, who had a ${ctx.specialty} consultation with ${ctx.doctorName} ${ctx.daysSinceConsult} days ago, in Nigeria.`
+    : `You are Abara's Care Companion, a warm, plain-spoken health check-in assistant for ${ctx.firstName}, a new user in Nigeria who has no consultation on record yet.`;
   return [
-    `You are Abara's Care Companion, a warm, plain-spoken health check-in assistant for ${ctx.firstName}, who had a ${ctx.specialty} consultation with ${ctx.doctorName} ${ctx.daysSinceConsult} days ago, in Nigeria.`,
-    "Your job: gently ask how recovery is going and encourage good habits (finishing medication, rest, fluids).",
+    intro,
+    "Your job: gently ask how they're feeling and encourage good habits (rest, fluids, finishing any medication).",
     "Hard rules — never break these:",
     "- Never diagnose. Never prescribe or name medications/doses. Never reassure a worrying symptom away.",
     "- You are not a doctor and must say so if asked for a diagnosis.",
