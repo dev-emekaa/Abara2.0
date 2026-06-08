@@ -105,6 +105,14 @@ export function CompanionChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ threadId, content }),
       });
+      if (resp.status === 429) {
+        const text =
+          "I'm just catching my breath — please send that again in a few seconds.";
+        setMessages((m) =>
+          m.map((msg) => (msg.id === aiId ? { ...msg, content: text } : msg)),
+        );
+        return;
+      }
       if (!resp.ok || !resp.body) throw new Error("stream failed");
 
       const reader = resp.body.getReader();

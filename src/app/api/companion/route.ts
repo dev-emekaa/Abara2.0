@@ -9,6 +9,7 @@ import {
 import { streamGeminiReply } from "@/lib/gemini";
 import { pickFallbackReply } from "@/services/companion";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,23 @@ export async function POST(req: NextRequest) {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // Throttle the paid AI endpoint per user.
+  const rl = rateLimit(`companion:${user.id}`, { limit: 20, windowMs: 60_000 });
+  if (!rl.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: "You're sending messages a little fast — give it a few seconds.",
+      }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(rl.retryAfterSec),
+        },
+      },
+    );
   }
 
   const body = await req.json().catch(() => null);
