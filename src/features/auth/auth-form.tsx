@@ -12,7 +12,8 @@ import {
   type LoginInput,
   type SignupInput,
 } from "@/lib/schemas";
-import { DEMO_CREDENTIALS } from "@/lib/mock-data";
+import { DEMO_CREDENTIALS } from "@/lib/demo";
+import { loginAction, signupAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,28 +30,23 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
+function FormError({ message }: { message: string | null }) {
+  if (!message) return null;
+  return (
+    <div className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-danger/30 bg-danger/8 px-3 py-2 text-sm text-danger">
+      <AlertCircle className="h-4 w-4 shrink-0" /> {message}
+    </div>
+  );
+}
+
 export function AuthForm({ mode }: { mode: Mode }) {
+  return mode === "signup" ? <SignupForm /> : <LoginForm />;
+}
+
+function LoginForm() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-
-  if (mode === "signup") {
-    return <SignupForm router={router} submitting={submitting} setSubmitting={setSubmitting} />;
-  }
-  return <LoginForm router={router} submitting={submitting} setSubmitting={setSubmitting} />;
-}
-
-interface InnerProps {
-  router: ReturnType<typeof useRouter>;
-  submitting: boolean;
-  setSubmitting: (v: boolean) => void;
-}
-
-/** Phase 1: mock submit — simulate latency then enter the app. */
-async function mockAuthDelay() {
-  await new Promise((r) => setTimeout(r, 650));
-}
-
-function LoginForm({ router, submitting, setSubmitting }: InnerProps) {
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -61,20 +57,28 @@ function LoginForm({ router, submitting, setSubmitting }: InnerProps) {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async () => {
+  async function submit(data: LoginInput) {
     setSubmitting(true);
-    await mockAuthDelay();
+    setFormError(null);
+    const res = await loginAction(data);
+    if (!res.ok) {
+      setFormError(res.error);
+      setSubmitting(false);
+      return;
+    }
     router.push("/app");
-  };
+    router.refresh();
+  }
 
-  const enterAsDemo = () => {
+  function enterAsDemo() {
     setValue("email", DEMO_CREDENTIALS.email);
     setValue("password", DEMO_CREDENTIALS.password);
-    void onSubmit();
-  };
+    void submit({ ...DEMO_CREDENTIALS });
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit(submit)} className="space-y-5" noValidate>
+      <FormError message={formError} />
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
@@ -125,7 +129,10 @@ function LoginForm({ router, submitting, setSubmitting }: InnerProps) {
   );
 }
 
-function SignupForm({ router, submitting, setSubmitting }: InnerProps) {
+function SignupForm() {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -135,14 +142,22 @@ function SignupForm({ router, submitting, setSubmitting }: InnerProps) {
     defaultValues: { fullName: "", email: "", location: "", password: "" },
   });
 
-  const onSubmit = async () => {
+  async function submit(data: SignupInput) {
     setSubmitting(true);
-    await mockAuthDelay();
+    setFormError(null);
+    const res = await signupAction(data);
+    if (!res.ok) {
+      setFormError(res.error);
+      setSubmitting(false);
+      return;
+    }
     router.push("/app");
-  };
+    router.refresh();
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit(submit)} className="space-y-5" noValidate>
+      <FormError message={formError} />
       <div>
         <Label htmlFor="fullName">Full name</Label>
         <Input

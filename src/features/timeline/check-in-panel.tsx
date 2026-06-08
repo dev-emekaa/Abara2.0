@@ -2,11 +2,10 @@
 
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { HeartPulse, Check } from "lucide-react";
+import { HeartPulse, Check, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useStreakStore } from "@/stores/streak-store";
+import { checkInAction } from "@/server/actions/timeline";
 import type { TimelineEvent } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 const MOODS = [
   { key: "better", emoji: "🌤️", label: "Better", detail: "Feeling better today — recovery on track." },
@@ -15,36 +14,47 @@ const MOODS = [
 ] as const;
 
 interface CheckInPanelProps {
-  onLogged: (event: TimelineEvent) => void;
+  /** Bubbles up the new streak count + an optimistic timeline event. */
+  onChecked: (result: { count: number; changed: boolean }, event: TimelineEvent) => void;
 }
 
 /**
- * "Log how I'm feeling" — the habit action. A successful check-in increments
- * the global care streak (with its spring animation) and drops a CHECKIN event
- * onto the timeline.
+ * "Log how I'm feeling" — the habit action. Persists via the check-in server
+ * action; the streak update + new timeline event flow back to the parent.
  */
-export function CheckInPanel({ onLogged }: CheckInPanelProps) {
+export function CheckInPanel({ onChecked }: CheckInPanelProps) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const counter = useRef(0);
-  const checkIn = useStreakStore((s) => s.checkIn);
 
-  function log(mood: (typeof MOODS)[number]) {
-    checkIn();
+  async function log(mood: (typeof MOODS)[number]) {
+    setPending(true);
+    setError(null);
+    const res = await checkInAction({ mood: mood.key });
+    setPending(false);
+
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+
     counter.current += 1;
-    onLogged({
+    onChecked(res.data, {
       id: `tl_checkin_${counter.current}`,
-      userId: "user_demo",
+      userId: "self",
       type: "CHECKIN",
       title: `You checked in: ${mood.label.toLowerCase()}`,
       detail: mood.detail,
       occurredAt: new Date().toISOString(),
     });
+
     setDone(true);
     setTimeout(() => {
       setOpen(false);
       setDone(false);
-    }, 1400);
+    }, 1600);
   }
 
   return (
@@ -66,6 +76,12 @@ export function CheckInPanel({ onLogged }: CheckInPanelProps) {
         )}
       </div>
 
+      {error && (
+        <p className="mt-3 flex items-center gap-1.5 text-sm text-danger">
+          <AlertCircle className="h-4 w-4" /> {error}
+        </p>
+      )}
+
       <AnimatePresence mode="wait">
         {done ? (
           <motion.div
@@ -75,7 +91,7 @@ export function CheckInPanel({ onLogged }: CheckInPanelProps) {
             exit={{ opacity: 0 }}
             className="mt-4 flex items-center gap-2 text-sm font-medium text-teal-700"
           >
-            <Check className="h-4 w-4" /> Logged — your streak just grew. Nice one.
+            <Check className="h-4 w-4" /> Logged — nice one. See you tomorrow.
           </motion.div>
         ) : (
           open && (
@@ -90,12 +106,15 @@ export function CheckInPanel({ onLogged }: CheckInPanelProps) {
                 <button
                   key={m.key}
                   type="button"
+                  disabled={pending}
                   onClick={() => log(m)}
-                  className={cn(
-                    "flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border border-border-strong bg-paper p-3 text-sm transition-all hover:-translate-y-0.5 hover:border-coral hover:shadow-soft",
-                  )}
+                  className="flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border border-border-strong bg-paper p-3 text-sm transition-all hover:-translate-y-0.5 hover:border-coral hover:shadow-soft disabled:opacity-60"
                 >
-                  <span className="text-2xl">{m.emoji}</span>
+                  {pending ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-ink-faint" />
+                  ) : (
+                    <span className="text-2xl">{m.emoji}</span>
+                  )}
                   <span className="text-ink-soft">{m.label}</span>
                 </button>
               ))}

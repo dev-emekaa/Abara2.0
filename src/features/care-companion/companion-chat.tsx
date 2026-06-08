@@ -7,7 +7,7 @@ import { MessageBubble, TypingIndicator } from "./message-bubble";
 import { EscalationBanner } from "./escalation-banner";
 import { Button } from "@/components/ui/button";
 import { detectEscalation, ESCALATION_MESSAGE } from "@/lib/escalation";
-import { demoThread } from "@/lib/mock-data";
+import { pickFallbackReply } from "@/services/companion";
 import type { CompanionRole } from "@/lib/types";
 
 interface ChatMsg {
@@ -17,12 +17,12 @@ interface ChatMsg {
   escalated: boolean;
 }
 
-/** Safe, non-diagnostic canned replies for the Phase 1 demo. */
-const SAFE_REPLIES = [
-  "Thanks for telling me — that really helps. Feeling a bit weak for a few days after malaria is normal while your body recovers. Are you still able to eat and drink okay?",
-  "Good to hear. Keep finishing the full course even now that you feel better — that's what stops it coming back. Want me to log this check-in on your timeline?",
-  "Glad you're resting. I'll check in again in a couple of days. If anything changes — especially if you feel worse — tell me right away and I'll bring in a doctor.",
-];
+export interface InitialMessage {
+  id: string;
+  role: CompanionRole;
+  content: string;
+  escalated: boolean;
+}
 
 const QUICK_REPLIES = [
   "I'm feeling a bit better",
@@ -30,26 +30,27 @@ const QUICK_REPLIES = [
   "My chest hurts and it's getting worse",
 ];
 
-let idCounter = 0;
-function nextId() {
-  idCounter += 1;
-  return `m_${idCounter}`;
+let clientId = 0;
+const nextId = () => `c_${(clientId += 1)}`;
+
+interface CompanionChatProps {
+  threadId: string;
+  initialMessages: InitialMessage[];
 }
 
-export function CompanionChat() {
+export function CompanionChat({ threadId, initialMessages }: CompanionChatProps) {
   const [messages, setMessages] = useState<ChatMsg[]>(() =>
-    demoThread.messages.map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-      escalated: m.escalated,
-    })),
+    initialMessages.map((m) => ({ ...m })),
   );
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [escalated, setEscalated] = useState(false);
+  const [escalated, setEscalated] = useState(() =>
+    initialMessages.some((m) => m.escalated),
+  );
   const [reasons, setReasons] = useState<string[]>([]);
-  const [replyIndex, setReplyIndex] = useState(0);
+  const [aiTurns, setAiTurns] = useState(
+    () => initialMessages.filter((m) => m.role === "AI").length,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,19 +60,76 @@ export function CompanionChat() {
     });
   }, [messages, typing, escalated]);
 
-  /** Reveal a canned reply word-by-word to mimic the Phase 3 SSE stream. */
-  async function streamReply(text: string) {
-    const id = nextId();
-    setMessages((m) => [...m, { id, role: "AI", content: "", escalated: false }]);
-    const words = text.split(" ");
-    let acc = "";
-    for (const word of words) {
-      acc = acc ? `${acc} ${word}` : word;
-      const snapshot = acc;
-      await new Promise((r) => setTimeout(r, 38));
+  /** Best-effort persistence; never blocks or crashes the UI. */
+  function persist(content: string) {
+    try {
+      void fetch("/api/companion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ threadId, content }),
+      }).catch(() => {});
+    } catch {
+      /* fetch unavailable (e.g. tests) — ignore */
+    }
+  }
+
+  /** Stream a normal reply from the SSE endpoint; fall back gracefully. */
+  async function streamReply(content: string) {
+    const aiId = nextId();
+    setMessages((m) => [...m, { id: aiId, role: "AI", content: "", escalated: false }]);
+
+    const fallback = () => {
+      const text = pickFallbackReply(aiTurns);
       setMessages((m) =>
-        m.map((msg) => (msg.id === id ? { ...msg, content: snapshot } : msg)),
+        m.map((msg) => (msg.id === aiId ? { ...msg, content: text } : msg)),
       );
+    };
+
+    try {
+      const resp = await fetch("/api/companion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ threadId, content }),
+      });
+      if (!resp.ok || !resp.body) throw new Error("stream failed");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          const evt = JSON.parse(line.slice(5).trim());
+          if (evt.type === "token") {
+            setMessages((m) =>
+              m.map((msg) =>
+                msg.id === aiId
+                  ? { ...msg, content: msg.content + evt.value }
+                  : msg,
+              ),
+            );
+          } else if (evt.type === "escalate") {
+            setReasons(evt.reasons ?? []);
+            setEscalated(true);
+            setMessages((m) =>
+              m.map((msg) =>
+                msg.id === aiId ? { ...msg, escalated: true } : msg,
+              ),
+            );
+          }
+        }
+      }
+    } catch {
+      fallback();
+    } finally {
+      setAiTurns((n) => n + 1);
     }
   }
 
@@ -85,8 +143,8 @@ export function CompanionChat() {
       { id: nextId(), role: "USER", content: trimmed, escalated: false },
     ]);
 
-    // GUARDRAIL: deterministic check runs before any AI reply (same module the
-    // Phase 3 server-side guardrail uses).
+    // Client mirror of the server guardrail — instant, deterministic UX.
+    // The server enforces and persists the same boundary.
     const verdict = detectEscalation(trimmed);
     if (verdict.escalated) {
       setReasons(verdict.matchedLabels);
@@ -95,19 +153,17 @@ export function CompanionChat() {
         { id: nextId(), role: "AI", content: ESCALATION_MESSAGE, escalated: true },
       ]);
       setEscalated(true);
+      persist(trimmed); // server records the escalation too
       return;
     }
 
     setTyping(true);
-    await new Promise((r) => setTimeout(r, 600));
+    await streamReply(trimmed);
     setTyping(false);
-    await streamReply(SAFE_REPLIES[Math.min(replyIndex, SAFE_REPLIES.length - 1)]);
-    setReplyIndex((i) => i + 1);
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Messages */}
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-4 pr-1"
@@ -118,17 +174,9 @@ export function CompanionChat() {
           ))}
         </AnimatePresence>
         {typing && <TypingIndicator />}
-        {escalated && (
-          <EscalationBanner
-            reasons={reasons}
-            onConnect={() => {
-              /* Phase 3: open a real escalation to a clinician. */
-            }}
-          />
-        )}
+        {escalated && <EscalationBanner reasons={reasons} />}
       </div>
 
-      {/* Quick replies */}
       {!escalated && (
         <div className="flex flex-wrap gap-2 py-3">
           {QUICK_REPLIES.map((q) => (
@@ -145,7 +193,6 @@ export function CompanionChat() {
         </div>
       )}
 
-      {/* Composer */}
       <form
         onSubmit={(e) => {
           e.preventDefault();

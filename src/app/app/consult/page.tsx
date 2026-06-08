@@ -3,8 +3,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FadeUp, Stagger, Rise } from "@/components/motion/reveal";
-import { demoConsultations } from "@/lib/mock-data";
+import { getConsultations } from "@/server/queries";
 import { formatDate } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
 
 const DOCTORS = [
   { name: "Dr. Ngozi Eze", specialty: "General Practice", next: "Today, 4:30pm" },
@@ -12,7 +14,8 @@ const DOCTORS = [
   { name: "Dr. Amara Nwosu", specialty: "Paediatrics", next: "Wed, 11:15am" },
 ];
 
-export default function ConsultPage() {
+export default async function ConsultPage() {
+  const consultations = await getConsultations();
   return (
     <div className="space-y-6">
       <FadeUp>
@@ -84,24 +87,30 @@ export default function ConsultPage() {
         <h2 className="mb-3 font-display text-xl text-ink">
           Your past consultations
         </h2>
-        <div className="space-y-3">
-          {demoConsultations.map((c) => (
-            <Card key={c.id} className="p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium text-ink">{c.doctorName}</p>
-                  <p className="text-xs text-ink-faint">
-                    {c.specialty} · {formatDate(c.createdAt)}
-                  </p>
+        {consultations.length === 0 ? (
+          <p className="text-sm text-ink-faint">
+            No past consultations yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {consultations.map((c) => (
+              <Card key={c.id} className="p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-ink">{c.doctorName}</p>
+                    <p className="text-xs text-ink-faint">
+                      {c.specialty} · {formatDate(c.createdAt.toISOString())}
+                    </p>
+                  </div>
+                  <Badge tone="teal">{c.status}</Badge>
                 </div>
-                <Badge tone="teal">{c.status}</Badge>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-                {c.summary}
-              </p>
-            </Card>
-          ))}
-        </div>
+                <p className="mt-3 text-pretty text-sm leading-relaxed text-ink-soft">
+                  {c.summary}
+                </p>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

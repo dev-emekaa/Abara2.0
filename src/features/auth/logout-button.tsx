@@ -4,11 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { logoutAction } from "@/server/actions/auth";
 
-/**
- * Phase 1: clears local UI state and returns to the landing page.
- * Phase 3 will also clear the httpOnly session cookie via a server action.
- */
 export function LogoutButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -18,14 +15,9 @@ export function LogoutButton() {
       variant="outline"
       onClick={async () => {
         setLoading(true);
-        try {
-          localStorage.removeItem("abara-streak");
-          localStorage.removeItem("abara-nudges");
-        } catch {
-          /* ignore storage errors */
-        }
-        await new Promise((r) => setTimeout(r, 400));
+        await logoutAction();
         router.push("/");
+        router.refresh();
       }}
       disabled={loading}
     >

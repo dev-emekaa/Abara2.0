@@ -3,8 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp } from "@/components/motion/reveal";
 import { LogoutButton } from "@/features/auth/logout-button";
-import { demoUser } from "@/lib/mock-data";
+import { requireUser } from "@/server/queries";
 import { formatDate } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
 
 const PREFS = [
   { icon: Bell, label: "Care nudges", value: "Email · On" },
@@ -12,8 +14,9 @@ const PREFS = [
   { icon: ShieldCheck, label: "Companion safety alerts", value: "Always on" },
 ];
 
-export default function ProfilePage() {
-  const initials = demoUser.fullName
+export default async function ProfilePage() {
+  const user = await requireUser();
+  const initials = user.fullName
     .split(" ")
     .map((p) => p[0])
     .join("")
@@ -37,7 +40,7 @@ export default function ProfilePage() {
               </span>
               <div>
                 <h2 className="font-display text-2xl text-ink">
-                  {demoUser.fullName}
+                  {user.fullName}
                 </h2>
                 <Badge tone="teal" className="mt-1">
                   Active care plan
@@ -48,15 +51,15 @@ export default function ProfilePage() {
             <ul className="mt-6 space-y-3 text-sm">
               <li className="flex items-center gap-3 break-all text-ink-soft">
                 <Mail className="h-4 w-4 shrink-0 text-ink-faint" />
-                {demoUser.email}
+                {user.email}
               </li>
               <li className="flex items-center gap-3 text-ink-soft">
                 <MapPin className="h-4 w-4 shrink-0 text-ink-faint" />
-                {demoUser.location}
+                {user.location}
               </li>
               <li className="flex items-center gap-3 text-ink-soft">
                 <CalendarDays className="h-4 w-4 shrink-0 text-ink-faint" />
-                Member since {formatDate(demoUser.createdAt)}
+                Member since {formatDate(user.createdAt.toISOString())}
               </li>
             </ul>
           </CardContent>

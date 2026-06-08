@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FadeUp } from "@/components/motion/reveal";
-import { useNudgeStore } from "@/stores/nudge-store";
-import { demoUser } from "@/lib/mock-data";
+import { setNudgeStatusAction } from "@/server/actions/nudges";
+import type { Nudge } from "@/lib/types";
 
 const KIND_LABEL = {
   FOLLOWUP: "Follow-up",
@@ -16,30 +16,29 @@ const KIND_LABEL = {
   SEASONAL: "Seasonal",
 } as const;
 
-export function NudgeDetail({ id }: { id: string }) {
-  const nudge = useNudgeStore((s) => s.nudges.find((n) => n.id === id));
-  const markSeen = useNudgeStore((s) => s.markSeen);
-  const markActed = useNudgeStore((s) => s.markActed);
+interface NudgeDetailProps {
+  nudge: Nudge;
+  userName: string;
+  userEmail: string;
+}
 
+export function NudgeDetail({ nudge, userName, userEmail }: NudgeDetailProps) {
+  // Optimistically show SEEN immediately; persist it in the effect below.
+  const [status, setStatus] = useState(
+    nudge.status === "PENDING" ? "SEEN" : nudge.status,
+  );
+  const firstName = userName.split(" ")[0] || "there";
+
+  // Persist "seen on first view" (no setState here — status already reflects it).
   useEffect(() => {
-    if (nudge && nudge.status === "PENDING") markSeen(nudge.id);
-  }, [nudge, markSeen]);
+    if (nudge.status === "PENDING") {
+      void setNudgeStatusAction({ nudgeId: nudge.id, status: "SEEN" });
+    }
+  }, [nudge.id, nudge.status]);
 
-  if (!nudge) {
-    return (
-      <div className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-card/50 p-10 text-center">
-        <p className="font-medium text-ink">Nudge not found</p>
-        <p className="mt-1 text-sm text-ink-faint">
-          It may have been cleared already.
-        </p>
-        <Link
-          href="/app/nudges"
-          className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}
-        >
-          Back to nudges
-        </Link>
-      </div>
-    );
+  function markActed() {
+    setStatus("ACTED");
+    void setNudgeStatusAction({ nudgeId: nudge.id, status: "ACTED" });
   }
 
   return (
@@ -55,27 +54,21 @@ export function NudgeDetail({ id }: { id: string }) {
         <CardContent className="space-y-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="teal">{KIND_LABEL[nudge.kind]}</Badge>
-            <Badge tone={nudge.status === "ACTED" ? "teal" : "neutral"}>
-              {nudge.status}
-            </Badge>
+            <Badge tone={status === "ACTED" ? "teal" : "neutral"}>{status}</Badge>
           </div>
           <h1 className="font-display text-2xl text-ink">{nudge.title}</h1>
-          <p className="leading-relaxed text-ink-soft">{nudge.body}</p>
+          <p className="text-pretty leading-relaxed text-ink-soft">{nudge.body}</p>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
               href={nudge.deepLink}
-              onClick={() => markActed(nudge.id)}
+              onClick={markActed}
               className={buttonVariants({ size: "md" })}
             >
               Take me there <ArrowRight className="h-4 w-4" />
             </Link>
-            {nudge.status !== "ACTED" && (
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => markActed(nudge.id)}
-              >
+            {status !== "ACTED" && (
+              <Button variant="outline" size="md" onClick={markActed}>
                 <Check className="h-4 w-4" /> Mark as done
               </Button>
             )}
@@ -83,8 +76,8 @@ export function NudgeDetail({ id }: { id: string }) {
         </CardContent>
       </Card>
 
-      {/* Email preview — prototype delivery channel. Required even though
-          sending is stubbed (WhatsApp is the production channel, out of scope). */}
+      {/* Email preview — prototype delivery channel (sending is stubbed; WhatsApp
+          is the production channel and is out of scope). */}
       <div>
         <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-faint">
           <Mail className="h-3.5 w-3.5" /> Email preview
@@ -92,7 +85,7 @@ export function NudgeDetail({ id }: { id: string }) {
         <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-paper shadow-soft">
           <div className="border-b border-border bg-cream-deep/60 px-5 py-3 text-xs text-ink-faint">
             <p className="break-words">
-              <span className="text-ink-soft">To:</span> {demoUser.email}
+              <span className="text-ink-soft">To:</span> {userEmail}
             </p>
             <p className="break-words">
               <span className="text-ink-soft">From:</span> Abara
@@ -103,10 +96,8 @@ export function NudgeDetail({ id }: { id: string }) {
             </p>
           </div>
           <div className="px-5 py-5">
-            <p className="text-sm leading-relaxed text-ink">
-              Hi {demoUser.fullName.split(" ")[0]},
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            <p className="text-sm leading-relaxed text-ink">Hi {firstName},</p>
+            <p className="mt-3 text-pretty text-sm leading-relaxed text-ink-soft">
               {nudge.body}
             </p>
             <span
@@ -124,8 +115,8 @@ export function NudgeDetail({ id }: { id: string }) {
           </div>
         </div>
         <p className="mt-2 text-xs text-ink-faint">
-          In the prototype, email sending no-ops to this preview unless an email
-          provider key is set.
+          Locally these are captured by Mailpit; in production they send via
+          Resend. With no provider set, sending no-ops to this preview.
         </p>
       </div>
     </FadeUp>

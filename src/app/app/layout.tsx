@@ -3,9 +3,8 @@ import { SideNav, BottomNav } from "@/components/app/app-nav";
 import { Logo } from "@/components/brand/logo";
 
 /**
- * Shell for the in-app (authenticated) experience. Route protection via
- * middleware is added in Phase 3; for now this is pure chrome around the
- * mock-data screens.
+ * Shell for the in-app (authenticated) experience. Route protection is enforced
+ * by middleware (`src/middleware.ts`); this provides the nav chrome.
  */
 export default function AppLayout({
   children,

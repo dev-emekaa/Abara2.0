@@ -1,10 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck } from "lucide-react";
 import { CompanionChat } from "@/features/care-companion/companion-chat";
-import { demoConsultations } from "@/lib/mock-data";
+import { getCompanionData } from "@/server/queries";
 
-export default function CompanionPage() {
-  const consult = demoConsultations[0];
+export const dynamic = "force-dynamic";
+
+export default async function CompanionPage() {
+  const { threadId, messages, doctorName } = await getCompanionData();
+  const initial = messages.map((m) => ({
+    id: m.id,
+    role: m.role,
+    content: m.content,
+    escalated: m.escalated,
+  }));
+
   return (
     <div className="flex h-[calc(100dvh-9.5rem)] flex-col md:h-[calc(100dvh-6rem)]">
       <header className="pb-3">
@@ -14,7 +23,7 @@ export default function CompanionPage() {
               Care Companion
             </h1>
             <p className="text-pretty text-sm text-ink-soft">
-              Checking in on your malaria recovery with {consult.doctorName}.
+              Checking in on your recovery with {doctorName}.
             </p>
           </div>
           <Badge tone="teal" className="mt-1 shrink-0">
@@ -29,7 +38,7 @@ export default function CompanionPage() {
         </p>
       </header>
       <div className="min-h-0 flex-1">
-        <CompanionChat />
+        <CompanionChat threadId={threadId} initialMessages={initial} />
       </div>
     </div>
   );

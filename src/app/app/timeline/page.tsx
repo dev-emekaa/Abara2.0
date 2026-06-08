@@ -1,7 +1,21 @@
 import { TimelineView } from "@/features/timeline/timeline-view";
 import { FadeUp } from "@/components/motion/reveal";
+import { getTimelineData } from "@/server/queries";
+import type { TimelineEvent } from "@/lib/types";
 
-export default function TimelinePage() {
+export const dynamic = "force-dynamic";
+
+export default async function TimelinePage() {
+  const { events, streakCount } = await getTimelineData();
+  const mapped: TimelineEvent[] = events.map((e) => ({
+    id: e.id,
+    userId: e.userId,
+    type: e.type,
+    title: e.title,
+    detail: e.detail,
+    occurredAt: e.occurredAt.toISOString(),
+  }));
+
   return (
     <div className="space-y-6">
       <FadeUp>
@@ -13,7 +27,7 @@ export default function TimelinePage() {
           streak that grows each time you check in.
         </p>
       </FadeUp>
-      <TimelineView />
+      <TimelineView initialEvents={mapped} initialStreak={streakCount} />
     </div>
   );
 }

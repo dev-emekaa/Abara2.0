@@ -1,15 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { BellRing, Inbox } from "lucide-react";
 import { NudgeCard } from "./nudge-card";
 import { Badge } from "@/components/ui/badge";
 import { Stagger, Rise } from "@/components/motion/reveal";
-import { useNudgeStore } from "@/stores/nudge-store";
+import { setNudgeStatusAction } from "@/server/actions/nudges";
+import type { Nudge } from "@/lib/types";
 
-export function NudgesInbox() {
-  const nudges = useNudgeStore((s) => s.nudges);
-  const markSeen = useNudgeStore((s) => s.markSeen);
+export function NudgesInbox({ initialNudges }: { initialNudges: Nudge[] }) {
+  const [nudges, setNudges] = useState<Nudge[]>(initialNudges);
   const pending = nudges.filter((n) => n.status === "PENDING").length;
+
+  function markSeen(id: string) {
+    setNudges((prev) =>
+      prev.map((n) =>
+        n.id === id && n.status === "PENDING" ? { ...n, status: "SEEN" } : n,
+      ),
+    );
+    void setNudgeStatusAction({ nudgeId: id, status: "SEEN" });
+  }
 
   if (nudges.length === 0) {
     return (

@@ -5,27 +5,39 @@ import { StreakCard } from "./streak-card";
 import { CheckInPanel } from "./check-in-panel";
 import { TimelineItem } from "./timeline-item";
 import { Stagger } from "@/components/motion/reveal";
-import { demoTimeline } from "@/lib/mock-data";
 import type { TimelineEvent } from "@/lib/types";
 
-/** Sort newest-first for display. */
 function sortDesc(events: TimelineEvent[]): TimelineEvent[] {
   return [...events].sort(
     (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
   );
 }
 
-export function TimelineView() {
+interface TimelineViewProps {
+  initialEvents: TimelineEvent[];
+  initialStreak: number;
+}
+
+export function TimelineView({ initialEvents, initialStreak }: TimelineViewProps) {
   const [events, setEvents] = useState<TimelineEvent[]>(() =>
-    sortDesc(demoTimeline),
+    sortDesc(initialEvents),
   );
+  const [streak, setStreak] = useState(initialStreak);
+  const [celebrate, setCelebrate] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <StreakCard compact />
+        <StreakCard count={streak} celebrate={celebrate} compact />
         <CheckInPanel
-          onLogged={(e) => setEvents((prev) => sortDesc([e, ...prev]))}
+          onChecked={(result, event) => {
+            setEvents((prev) => sortDesc([event, ...prev]));
+            if (result.changed) {
+              setStreak(result.count);
+              setCelebrate(true);
+              setTimeout(() => setCelebrate(false), 1800);
+            }
+          }}
         />
       </div>
 

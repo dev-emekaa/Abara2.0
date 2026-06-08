@@ -5,9 +5,9 @@ import { verifySession, SESSION_COOKIE } from "@/lib/auth/jwt";
 /**
  * Protect the in-app experience. Unauthenticated requests to /app/* are sent to
  * the login page with a redirect back. Runs on the Edge runtime — only imports
- * the jose-based verifier (no Node/Prisma).
+ * the jose-based verifier (no Node/Prisma). (Next 16 "proxy" convention.)
  */
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
 

@@ -15,27 +15,35 @@ telemedicine app, focused on three features:
 Consultations, payments, video, and WhatsApp are **out of scope** (booking is a
 visual stub).
 
-## Status: Phase 1 (UI-first)
+## Status: full working core
 
-This commit is the **UI built on mock data** — every screen, the full design
-system, and motion are in place; the backend (Prisma, server actions, Gemini
-streaming, auth) lands in later phases. See
-[`SETUP.md`](./SETUP.md) for integration and deploy guides.
+Every screen is wired to a real backend: email+password auth (JWT in an httpOnly
+cookie, middleware-protected routes), Prisma + Postgres, server actions, RSC data
+fetching, and a streaming Gemini-backed Care Companion with a deterministic,
+server-enforced safety guardrail. New accounts (and the demo) are auto-seeded so
+the app is never empty. See [`SETUP.md`](./SETUP.md) for integration and deploy
+guides. Out of scope: real booking, payments, video, WhatsApp.
 
 ## Tech
 
-Next.js (App Router) · TypeScript (strict) · Tailwind v4 · Framer Motion ·
-Zustand · React Hook Form + Zod · (later) Prisma + Postgres + Gemini.
+Next.js 16 (App Router) · TypeScript (strict) · Tailwind v4 · Framer Motion ·
+Zustand · React Hook Form + Zod · Prisma + PostgreSQL · jose + bcryptjs ·
+Google Gemini (free tier) · Jest + RTL.
 
 ## Run it
 
 ```bash
-corepack enable pnpm   # one-time: makes pnpm available
+corepack enable pnpm        # one-time: makes pnpm available
 pnpm install
-pnpm dev               # http://localhost:3000
+docker compose up -d        # local Postgres (5434), test DB (5435), Mailpit (8026)
+cp .env.example .env        # then fill JWT_SECRET (+ optional GEMINI/RESEND keys)
+pnpm db:migrate             # apply schema
+pnpm db:seed                # create the demo account + starter data
+pnpm dev                    # http://localhost:3000
 ```
 
-No environment variables or database are needed for Phase 1.
+The app runs fully **without** a Gemini or email key — the companion falls back
+to safe canned replies and email no-ops to an in-app preview.
 
 ### Demo login
 
@@ -75,4 +83,4 @@ demo@abara.health  /  demo1234
 | `pnpm db:migrate`       | Prisma migrate (Phase 3)                      |
 | `pnpm db:seed`          | Seed demo data (Phase 3)                      |
 
-> Test and DB scripts are wired now but exercised from Phase 2/3 onward.
+> Integration tests need the Docker test DB running (`docker compose up -d`).

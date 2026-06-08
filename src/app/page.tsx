@@ -11,7 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp, Stagger, Rise } from "@/components/motion/reveal";
 import { EnterDemoButton } from "@/features/auth/enter-demo-button";
-import { DEMO_CREDENTIALS } from "@/lib/mock-data";
+import { DEMO_CREDENTIALS } from "@/lib/demo";
 
 const FEATURES = [
   {

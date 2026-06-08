@@ -1,7 +1,23 @@
 import { NudgesInbox } from "@/features/nudges/nudges-inbox";
 import { FadeUp } from "@/components/motion/reveal";
+import { getNudges } from "@/server/queries";
+import type { Nudge } from "@/lib/types";
 
-export default function NudgesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NudgesPage() {
+  const nudges = await getNudges();
+  const mapped: Nudge[] = nudges.map((n) => ({
+    id: n.id,
+    userId: n.userId,
+    kind: n.kind,
+    title: n.title,
+    body: n.body,
+    deepLink: n.deepLink,
+    status: n.status,
+    createdAt: n.createdAt.toISOString(),
+  }));
+
   return (
     <div className="space-y-6">
       <FadeUp>
@@ -13,7 +29,7 @@ export default function NudgesPage() {
           spam.
         </p>
       </FadeUp>
-      <NudgesInbox />
+      <NudgesInbox initialNudges={mapped} />
     </div>
   );
 }
