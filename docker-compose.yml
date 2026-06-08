@@ -1,0 +1,57 @@
+# Local infrastructure for Abara development & testing.
+# Ports are chosen to avoid clashing with other local containers
+# (5433 / 1025 / 8025 are assumed taken by another project).
+#
+#   pnpm dlx ...                 # nothing required here
+#   docker compose up -d         # start dev DB, test DB, and Mailpit
+#   docker compose down          # stop them (add -v to wipe data)
+
+services:
+  # Primary development database.
+  db:
+    image: postgres:16
+    container_name: abara_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: abara
+      POSTGRES_PASSWORD: abara
+      POSTGRES_DB: abara
+    ports:
+      - "5434:5432"
+    volumes:
+      - abara_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U abara"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Dedicated test database — integration tests truncate it between tests.
+  db_test:
+    image: postgres:16
+    container_name: abara_db_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: abara
+      POSTGRES_PASSWORD: abara
+      POSTGRES_DB: abara_test
+    ports:
+      - "5435:5432"
+    # No named volume: the test DB is disposable by design.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U abara"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Local email capture for nudge previews (production uses Resend).
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: abara_mailpit
+    restart: unless-stopped
+    ports:
+      - "1026:1025" # SMTP
+      - "8026:8025" # Web UI -> http://localhost:8026
+
+volumes:
+  abara_db_data:

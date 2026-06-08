@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/*
+  Abara design system — warm, calm, human.
+  Deep teal primary on warm cream, coral accent reserved for positive moments.
+  Deliberately NOT a clinical blue SaaS palette.
+*/
+
+:root {
+  /* Surfaces — warm cream, never stark white */
+  --cream: #f7f3ea;
+  --cream-deep: #f0e9da;
+  --paper: #fffdf8;
+  --ink: #20312c;
+  --ink-soft: #4a5a53;
+  --ink-faint: #7c8a83;
+
+  /* Primary — grounded deep teal / forest */
+  --teal-950: #0c211c;
+  --teal-900: #103029;
+  --teal-800: #16433a;
+  --teal-700: #1d5a4d;
+  --teal-600: #237a64;
+  --teal-500: #2f9a7f;
+  --teal-300: #8fcdb9;
+  --teal-100: #d7ece2;
+
+  /* Accent — warm coral / amber, used sparingly for delight */
+  --coral: #e8744e;
+  --coral-soft: #f4a384;
+  --amber: #e8a23c;
+
+  /* Functional */
+  --danger: #c1432b;
+  --danger-soft: #e98a76;
+  --border: #e3dac8;
+  --border-strong: #d2c6ad;
+  --ring: var(--teal-600);
+
+  /* Mapped roles */
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --muted: var(--ink-faint);
+  --primary: var(--teal-700);
+  --primary-foreground: #f4fbf7;
+  --accent: var(--coral);
+
+  --radius: 1.1rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-paper: var(--paper);
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-muted: var(--muted);
+
+  --color-teal-950: var(--teal-950);
+  --color-teal-900: var(--teal-900);
+  --color-teal-800: var(--teal-800);
+  --color-teal-700: var(--teal-700);
+  --color-teal-600: var(--teal-600);
+  --color-teal-500: var(--teal-500);
+  --color-teal-300: var(--teal-300);
+  --color-teal-100: var(--teal-100);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-amber: var(--amber);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-hanken);
+
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1.1rem;
+  --radius-lg: 1.6rem;
+  --radius-xl: 2.2rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), ui-sans-serif, sans-serif;
+    font-feature-settings: "ss01";
+    /* Atmospheric warmth: layered radial glows. */
+    background-image:
+      radial-gradient(
+        62rem 40rem at 12% -8%,
+        rgba(47, 154, 127, 0.1),
+        transparent 60%
+      ),
+      radial-gradient(
+        48rem 34rem at 108% 4%,
+        rgba(232, 116, 78, 0.08),
+        transparent 55%
+      );
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+    font-weight: 560;
+    letter-spacing: -0.012em;
+  }
+}
+
+@layer utilities {
+  /* Subtle film grain overlay for premium depth. */
+  .grain::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px rgba(16, 48, 41, 0.04),
+      0 8px 24px -12px rgba(16, 48, 41, 0.12);
+  }
+
+  .shadow-lift {
+    box-shadow:
+      0 1px 2px rgba(16, 48, 41, 0.05),
+      0 18px 48px -20px rgba(16, 48, 41, 0.22);
+  }
+
+  .shadow-glow-coral {
+    box-shadow: 0 10px 32px -12px rgba(232, 116, 78, 0.5);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
