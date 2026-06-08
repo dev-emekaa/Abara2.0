@@ -25,48 +25,51 @@ export interface EscalationRule {
  * Extend sensibly — but every entry here is part of the safety contract.
  */
 export const ESCALATION_RULES: readonly EscalationRule[] = [
+  // NOTE: trailing \b is deliberately omitted on rules whose final word can take
+  // a plural/suffix ("pain"→"pains", "seizure"→"seizures", "bleed"→"bleeds"), or
+  // the suffix is matched explicitly. A guardrail must fail toward escalation.
   {
     id: "chest-pain",
     label: "Chest pain",
-    pattern: /\bchest\s*(?:pain|tightness|pressure)\b/i,
+    pattern: /\bchest\s*(?:pain|tightness|pressure)/i,
   },
   {
     id: "breathing",
     label: "Difficulty breathing",
     pattern:
-      /\b(?:difficulty\s+breathing|can'?t\s+breathe|cannot\s+breathe|short(?:ness)?\s+of\s+breath|struggling\s+to\s+breathe|gasping)\b/i,
+      /\b(?:difficulty\s+breathing|can'?t\s+breathe|cannot\s+breathe|short(?:ness)?\s+of\s+breath|struggling\s+to\s+breathe|gasping)/i,
   },
   {
     id: "severe-bleeding",
     label: "Severe bleeding",
-    pattern: /\b(?:severe|heavy|won'?t\s+stop|uncontrolled)\s+bleed(?:ing)?\b/i,
+    pattern: /\b(?:severe|heavy|won'?t\s+stop|uncontrolled)\s+bleed/i,
   },
   {
     id: "coughing-vomiting-blood",
     label: "Coughing or vomiting blood",
     pattern:
-      /\b(?:cough(?:ing)?|vomit(?:ing)?|throwing\s+up|spitting)\s+(?:up\s+)?blood\b/i,
+      /\b(?:cough(?:ing)?|vomit(?:ing)?|throwing\s+up|spitting)\s+(?:up\s+)?blood/i,
   },
   {
     id: "fainting",
     label: "Fainting / loss of consciousness",
     pattern:
-      /\b(?:faint(?:ed|ing)?|pass(?:ed|ing)?\s+out|black(?:ed)?\s+out|loss\s+of\s+consciousness|unconscious|collapsed)\b/i,
+      /\b(?:faint(?:ed|ing|s)?|pass(?:ed|ing)?\s+out|black(?:ed)?\s+out|loss\s+of\s+consciousness|unconscious|collaps(?:e|ed|ing))/i,
   },
   {
     id: "seizure",
     label: "Seizure",
-    pattern: /\b(?:seizure|seizing|convuls(?:ion|ing))\b/i,
+    pattern: /\b(?:seizure|seizing|seizures|convuls(?:ion|ing|ions))/i,
   },
   {
     id: "stiff-neck-fever",
     label: "Stiff neck with fever",
-    pattern: /\bstiff\s+neck\b/i,
+    pattern: /\bstiff\s+neck/i,
   },
   {
     id: "severe-worsening-pain",
     label: "Severe or worsening pain",
-    pattern: /\b(?:severe|excruciating|unbearable|worsening)\s+pain\b/i,
+    pattern: /\b(?:severe|excruciating|unbearable|worsening)\s+pain/i,
   },
   {
     id: "getting-worse",
