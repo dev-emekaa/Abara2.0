@@ -95,8 +95,10 @@ export const ESCALATION_RULES: readonly EscalationRule[] = [
   {
     id: "stroke-signs",
     label: "Signs of stroke",
+    // Phrased loosely on purpose — order-independent and suffix-tolerant — so
+    // "face is drooping" / "speech is slurred" both trip it. Fail toward safety.
     pattern:
-      /\b(?:face\s+droop(?:ing)?|slurred\s+speech|can'?t\s+speak|weak(?:ness)?\s+on\s+one\s+side|numb\s+on\s+one\s+side|one\s+side\s+(?:of\s+my\s+(?:face|body)\s+)?(?:is\s+)?(?:weak|numb|droop))\b/i,
+      /\bface\s+(?:is\s+|has\s+)?droop|droop\w*\s+(?:on\s+)?(?:the\s+|my\s+)?face|\bslurred\s+speech\b|\bspeech\s+(?:is\s+|sounds\s+)?slurr|\bslurring\b|\bweak(?:ness)?\s+(?:on|down)\s+one\s+side\b|\bnumb\w*\s+(?:on|down)\s+one\s+side\b|\bone\s+side\s+(?:of\s+[\w\s]+?)?(?:is\s+)?(?:weak|numb|droop)/i,
   },
 ];
 
