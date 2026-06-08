@@ -91,14 +91,14 @@ export function NudgeDetail({ id }: { id: string }) {
         </p>
         <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-paper shadow-soft">
           <div className="border-b border-border bg-cream-deep/60 px-5 py-3 text-xs text-ink-faint">
-            <p>
+            <p className="break-words">
               <span className="text-ink-soft">To:</span> {demoUser.email}
             </p>
-            <p>
+            <p className="break-words">
               <span className="text-ink-soft">From:</span> Abara
               &lt;care@abara.health&gt;
             </p>
-            <p>
+            <p className="break-words">
               <span className="text-ink-soft">Subject:</span> {nudge.title}
             </p>
           </div>

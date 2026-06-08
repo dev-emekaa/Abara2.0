@@ -13,8 +13,8 @@ export default function LoginPage() {
             <Logo />
           </Link>
           <h1 className="mt-6 font-display text-3xl text-ink">Welcome back</h1>
-          <p className="mt-2 text-ink-soft">
-            Let&apos;s pick up where your health left off.
+          <p className="mt-2 text-pretty text-ink-soft">
+            Your timeline, streak and companion are right where you left them.
           </p>
         </div>
         <Card>

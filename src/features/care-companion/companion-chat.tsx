@@ -19,9 +19,9 @@ interface ChatMsg {
 
 /** Safe, non-diagnostic canned replies for the Phase 1 demo. */
 const SAFE_REPLIES = [
-  "Thank you for telling me — that really helps. A bit of lingering tiredness after malaria is common as your body rebuilds. Are you managing to eat and drink normally?",
-  "Good to hear. Keep finishing your full course even as you feel better — that's what stops it coming back. Want me to log this as a check-in on your timeline?",
-  "I'm glad you're resting. I'll check in again in a couple of days. If anything changes — especially if you feel worse — tell me straight away and I'll get a doctor involved.",
+  "Thanks for telling me — that really helps. Feeling a bit weak for a few days after malaria is normal while your body recovers. Are you still able to eat and drink okay?",
+  "Good to hear. Keep finishing the full course even now that you feel better — that's what stops it coming back. Want me to log this check-in on your timeline?",
+  "Glad you're resting. I'll check in again in a couple of days. If anything changes — especially if you feel worse — tell me right away and I'll bring in a doctor.",
 ];
 
 const QUICK_REPLIES = [
@@ -106,9 +106,12 @@ export function CompanionChat() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-9rem)] flex-col md:h-[calc(100dvh-7rem)]">
+    <div className="flex h-full min-h-0 flex-col">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto pb-4 pr-1">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-4 pr-1"
+      >
         <AnimatePresence initial={false}>
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />

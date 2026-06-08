@@ -22,8 +22,9 @@ export default function ConsultPage() {
           </h1>
           <Badge tone="amber">Demo</Badge>
         </div>
-        <p className="mt-1 text-ink-soft">
-          This is where Abara&apos;s existing consultation flow lives.
+        <p className="mt-1 text-pretty text-ink-soft">
+          This is where Abara&apos;s existing booking flow lives. It&apos;s shown
+          here as a demo so you can see how it fits.
         </p>
       </FadeUp>
 
@@ -32,12 +33,11 @@ export default function ConsultPage() {
         <div className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-amber/40 bg-amber/8 p-5">
           <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#9a6510]" />
           <div className="text-sm leading-relaxed text-ink">
-            <p className="font-medium">Visual stub only.</p>
-            <p className="mt-1 text-ink-soft">
-              Real booking, payments and live video are intentionally out of
-              scope for this retention-layer prototype. The buttons below are
-              non-functional placeholders showing where the existing flow plugs
-              in.
+            <p className="font-medium">This screen is a demo.</p>
+            <p className="mt-1 text-pretty text-ink-soft">
+              Booking, payment and video aren&apos;t built here — this prototype
+              is about what keeps you coming back after a visit. The buttons
+              below just show where the real flow would slot in.
             </p>
           </div>
         </div>

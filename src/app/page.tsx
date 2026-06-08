@@ -16,20 +16,20 @@ import { DEMO_CREDENTIALS } from "@/lib/mock-data";
 const FEATURES = [
   {
     icon: MessageCircleHeart,
-    title: "Care Companion",
-    body: "A gentle AI that checks in after your visit, asks how recovery is going — and hands you to a real doctor the moment anything looks off.",
+    title: "A check-in that actually cares",
+    body: "Like a nurse who remembers you. A few days after your visit, Abara asks how you're feeling. Healing well? Lovely. Something not right? It doesn't guess — it connects you to a real doctor, fast.",
     tone: "text-teal-700",
   },
   {
     icon: CalendarHeart,
-    title: "Health Timeline & Streaks",
-    body: "Your whole health story as a living timeline, with a care streak that quietly rewards you for showing up for yourself.",
+    title: "Everything in one place, finally",
+    body: "No more \"which drug did they give me last time?\" Your consultations, medications and recoveries sit in one simple timeline. Log how you feel, and watch your care streak grow.",
     tone: "text-coral",
   },
   {
     icon: BellRing,
-    title: "Smart Health Nudges",
-    body: "Timely, personal reminders drawn from your own history — a follow-up due, a dose to finish, malaria season in your area.",
+    title: "A nudge at the right moment",
+    body: "Abara remembers what's easy to forget — the follow-up that's due, the last dose to finish, malaria season creeping into your area. One tap and you know exactly what to do.",
     tone: "text-[#9a6510]",
   },
 ];
@@ -40,8 +40,11 @@ export default function LandingPage() {
       {/* Top bar */}
       <header className="flex items-center justify-between py-6">
         <Logo />
-        <div className="flex items-center gap-2">
-          <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <Link
+            href="/login"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             Log in
           </Link>
           <Link href="/signup" className={buttonVariants({ size: "sm" })}>
@@ -51,33 +54,39 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="grid flex-1 items-center gap-10 py-10 md:grid-cols-[1.05fr_0.95fr] md:py-16">
-        <div>
+      <section className="grid flex-1 items-center gap-10 py-8 md:grid-cols-[1.05fr_0.95fr] md:py-16">
+        <div className="min-w-0">
           <FadeUp>
             <Badge tone="teal" className="mb-5">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Built for life between visits
+              Care that keeps going after your visit
             </Badge>
           </FadeUp>
           <FadeUp delay={0.05}>
-            <h1 className="text-balance font-display text-[2.6rem] leading-[1.05] text-ink md:text-6xl">
+            <h1 className="text-balance font-display text-[2.05rem] leading-[1.08] text-ink sm:text-5xl md:text-6xl">
               Your health doesn&apos;t end when the{" "}
               <span className="text-teal-700">consultation</span> does.
             </h1>
           </FadeUp>
           <FadeUp delay={0.12}>
-            <p className="mt-5 max-w-xl text-balance text-lg leading-relaxed text-ink-soft">
-              Abara turns a one-time visit into an ongoing relationship — a
-              caring companion that follows up, a timeline that remembers, and
-              nudges that bring you back before a small thing becomes a big one.
+            <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-ink-soft sm:text-lg">
+              You see a doctor, feel a little better, and life moves on. But did
+              the malaria really clear? Did you finish the meds? Abara stays with
+              you afterwards: a friendly check-in after your visit, your whole
+              health story in one place, and a reminder at exactly the right
+              moment.
             </p>
           </FadeUp>
           <FadeUp delay={0.2}>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <EnterDemoButton size="lg" />
+              <EnterDemoButton size="lg" className="w-full sm:w-auto" />
               <Link
                 href="/signup"
-                className={buttonVariants({ variant: "outline", size: "lg" })}
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "lg",
+                  className: "w-full sm:w-auto",
+                })}
               >
                 Create your account
               </Link>
@@ -85,7 +94,9 @@ export default function LandingPage() {
           </FadeUp>
           <FadeUp delay={0.28}>
             <p className="mt-4 text-sm text-ink-faint">
-              Demo login —{" "}
+              Just exploring? Tap{" "}
+              <span className="font-medium text-ink-soft">Enter as demo</span> —
+              or sign in with{" "}
               <span className="font-medium text-ink-soft">
                 {DEMO_CREDENTIALS.email}
               </span>{" "}
@@ -116,7 +127,16 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="pb-16 md:pb-24">
-        <Stagger className="grid gap-5 md:grid-cols-3">
+        <FadeUp>
+          <h2 className="text-balance font-display text-2xl text-ink sm:text-3xl">
+            Three simple things that keep you well
+          </h2>
+          <p className="mt-2 max-w-2xl text-pretty text-ink-soft">
+            Not another app to babysit. Just the few things that turn one visit
+            into care that actually sticks.
+          </p>
+        </FadeUp>
+        <Stagger className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => {
             const Icon = f.icon;
             return (
@@ -142,9 +162,9 @@ export default function LandingPage() {
         <Link href="/login" className="font-medium text-primary hover:underline">
           Already with us? Log in <ArrowRight className="inline h-3.5 w-3.5" />
         </Link>
-        <p>
-          Abara is a retention-layer prototype. It never replaces a doctor; in an
-          emergency, seek care immediately.
+        <p className="max-w-md text-pretty">
+          Abara supports your care between visits — it never replaces a doctor.
+          In an emergency, seek medical help immediately.
         </p>
       </footer>
     </div>

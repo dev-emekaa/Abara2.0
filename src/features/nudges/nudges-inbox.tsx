@@ -15,9 +15,10 @@ export function NudgesInbox() {
     return (
       <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-card/50 p-12 text-center">
         <Inbox className="h-10 w-10 text-ink-faint" />
-        <p className="mt-3 font-medium text-ink">You&apos;re all caught up</p>
-        <p className="text-sm text-ink-faint">
-          New nudges will appear here as your care moves along.
+        <p className="mt-3 font-medium text-ink">Nothing needs you right now</p>
+        <p className="text-pretty text-sm text-ink-faint">
+          When something&apos;s worth your attention — a follow-up, a dose, a
+          seasonal heads-up — it&apos;ll show up here.
         </p>
       </div>
     );
@@ -28,7 +29,9 @@ export function NudgesInbox() {
       <div className="flex items-center gap-2 text-sm text-ink-soft">
         <BellRing className="h-4 w-4 text-coral" />
         <span>
-          {pending > 0 ? `${pending} waiting for you` : "Nothing new right now"}
+          {pending > 0
+            ? `${pending} ${pending === 1 ? "nudge needs" : "nudges need"} a look`
+            : "You're all caught up"}
         </span>
         {pending > 0 && <Badge tone="coral">{pending} new</Badge>}
       </div>

@@ -12,12 +12,12 @@ export default function SignupPage() {
           <Link href="/" aria-label="Abara home" className="inline-block">
             <Logo />
           </Link>
-          <h1 className="mt-6 font-display text-3xl text-ink">
+          <h1 className="mt-6 text-balance font-display text-3xl text-ink">
             Start your health story
           </h1>
-          <p className="mt-2 text-ink-soft">
-            We&apos;ll set up your space with a head start — so it&apos;s alive
-            from day one.
+          <p className="mt-2 text-pretty text-ink-soft">
+            Takes a minute. We&apos;ll set up your space with a head start, so
+            it&apos;s alive and useful from day one — not an empty shell.
           </p>
         </div>
         <Card>

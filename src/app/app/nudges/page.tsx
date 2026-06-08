@@ -8,8 +8,9 @@ export default function NudgesPage() {
         <h1 className="font-display text-3xl text-ink md:text-4xl">
           Your Nudges
         </h1>
-        <p className="mt-1 text-ink-soft">
-          Gentle, personal reminders drawn from your own health history.
+        <p className="mt-1 text-pretty text-ink-soft">
+          Small, personal reminders — built from your own health history, never
+          spam.
         </p>
       </FadeUp>
       <NudgesInbox />

@@ -109,6 +109,8 @@
     color: var(--foreground);
     font-family: var(--font-sans), ui-sans-serif, sans-serif;
     font-feature-settings: "ss01";
+    /* Safety net: never allow accidental horizontal scroll on any viewport. */
+    overflow-x: hidden;
     /* Atmospheric warmth: layered radial glows. */
     background-image:
       radial-gradient(

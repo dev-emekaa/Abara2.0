@@ -23,7 +23,9 @@ export default function ProfilePage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <FadeUp>
         <h1 className="font-display text-3xl text-ink md:text-4xl">Profile</h1>
-        <p className="mt-1 text-ink-soft">Your account and preferences.</p>
+        <p className="mt-1 text-pretty text-ink-soft">
+          Your account, and how Abara checks in with you.
+        </p>
       </FadeUp>
 
       <FadeUp delay={0.05}>
@@ -43,20 +45,20 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <dl className="mt-6 space-y-3 text-sm">
-              <div className="flex items-center gap-3 text-ink-soft">
-                <Mail className="h-4 w-4 text-ink-faint" />
+            <ul className="mt-6 space-y-3 text-sm">
+              <li className="flex items-center gap-3 break-all text-ink-soft">
+                <Mail className="h-4 w-4 shrink-0 text-ink-faint" />
                 {demoUser.email}
-              </div>
-              <div className="flex items-center gap-3 text-ink-soft">
-                <MapPin className="h-4 w-4 text-ink-faint" />
+              </li>
+              <li className="flex items-center gap-3 text-ink-soft">
+                <MapPin className="h-4 w-4 shrink-0 text-ink-faint" />
                 {demoUser.location}
-              </div>
-              <div className="flex items-center gap-3 text-ink-soft">
-                <CalendarDays className="h-4 w-4 text-ink-faint" />
+              </li>
+              <li className="flex items-center gap-3 text-ink-soft">
+                <CalendarDays className="h-4 w-4 shrink-0 text-ink-faint" />
                 Member since {formatDate(demoUser.createdAt)}
-              </div>
-            </dl>
+              </li>
+            </ul>
           </CardContent>
         </Card>
       </FadeUp>

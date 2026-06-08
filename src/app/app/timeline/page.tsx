@@ -8,9 +8,9 @@ export default function TimelinePage() {
         <h1 className="font-display text-3xl text-ink md:text-4xl">
           Health Timeline
         </h1>
-        <p className="mt-1 text-ink-soft">
-          Every consult, recovery and check-in — and the streak that grows with
-          you.
+        <p className="mt-1 text-pretty text-ink-soft">
+          Everything that&apos;s happened to your health, in one place — and a
+          streak that grows each time you check in.
         </p>
       </FadeUp>
       <TimelineView />

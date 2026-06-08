@@ -107,12 +107,18 @@ function LoginForm({ router, submitting, setSubmitting }: InnerProps) {
         {submitting ? "Signing you in…" : "Log in"}
       </Button>
 
+      <div className="flex items-center gap-3 text-xs text-ink-faint">
+        <span className="h-px flex-1 bg-border" />
+        or have a look around first
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <DemoButton onClick={enterAsDemo} disabled={submitting} />
 
       <p className="text-center text-sm text-ink-soft">
         New to Abara?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">
-          Create an account
+          Create your account
         </Link>
       </p>
     </form>
