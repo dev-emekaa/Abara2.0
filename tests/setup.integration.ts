@@ -1,6 +1,25 @@
+import { prisma } from "@/lib/prisma";
+
 /**
- * Integration test setup — fleshed out in Phase 4.
- * Resets the test database between tests so each runs in isolation.
- * (No-op until the integration suite and Prisma client exist.)
+ * Reset the test database before every test so each runs in isolation and in
+ * any order. TRUNCATE … CASCADE is fast and resets identities.
  */
-export {};
+const TABLES = [
+  "Nudge",
+  "CompanionMessage",
+  "CompanionThread",
+  "TimelineEvent",
+  "Streak",
+  "Consultation",
+  "User",
+];
+
+beforeEach(async () => {
+  await prisma.$executeRawUnsafe(
+    `TRUNCATE TABLE ${TABLES.map((t) => `"${t}"`).join(", ")} RESTART IDENTITY CASCADE`,
+  );
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});

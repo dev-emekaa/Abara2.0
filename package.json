@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --selectProjects unit && jest --selectProjects integration --runInBand",
     "test:unit": "jest --selectProjects unit",
     "test:integration": "jest --selectProjects integration --runInBand",
     "db:migrate": "prisma migrate dev",

@@ -30,7 +30,9 @@ const buildConfig = async (): Promise<Config> => {
     ...baseConfig,
     displayName: "integration",
     testEnvironment: "node",
+    setupFiles: ["<rootDir>/tests/env.integration.ts"],
     setupFilesAfterEnv: ["<rootDir>/tests/setup.integration.ts"],
+    globalSetup: "<rootDir>/tests/global-setup.integration.ts",
     testMatch: ["<rootDir>/tests/integration/**/*.test.ts"],
   })();
 
