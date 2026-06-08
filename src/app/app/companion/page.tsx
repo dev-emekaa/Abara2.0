@@ -6,7 +6,8 @@ import { getCompanionData } from "@/server/queries";
 export const dynamic = "force-dynamic";
 
 export default async function CompanionPage() {
-  const { threadId, messages, doctorName } = await getCompanionData();
+  const { threadId, status, summary, messages, doctorName } =
+    await getCompanionData();
   const initial = messages.map((m) => ({
     id: m.id,
     role: m.role,
@@ -38,7 +39,13 @@ export default async function CompanionPage() {
         </p>
       </header>
       <div className="min-h-0 flex-1">
-        <CompanionChat threadId={threadId} initialMessages={initial} />
+        <CompanionChat
+          key={threadId}
+          threadId={threadId}
+          initialMessages={initial}
+          status={status}
+          summary={summary}
+        />
       </div>
     </div>
   );

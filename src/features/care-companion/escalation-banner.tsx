@@ -1,20 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ShieldAlert, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 interface EscalationBannerProps {
   reasons?: string[];
-  onConnect?: () => void;
 }
 
 /**
  * The non-negotiable safety surface. When the guardrail flags a red-flag
  * signal, normal triage stops and this clear "Connect with a doctor" CTA
- * appears. Deliberately uses the danger tone — calm everywhere else, urgent here.
+ * appears, routing to the consultation flow with context.
  */
-export function EscalationBanner({ reasons, onConnect }: EscalationBannerProps) {
+export function EscalationBanner({ reasons }: EscalationBannerProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -42,13 +42,13 @@ export function EscalationBanner({ reasons, onConnect }: EscalationBannerProps) 
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button variant="danger" size="sm" onClick={onConnect}>
+            <Link
+              href="/app/consult?ref=companion"
+              className={buttonVariants({ variant: "danger", size: "sm" })}
+            >
               <Phone className="h-4 w-4" />
               Connect with a doctor
-            </Button>
-            <Button variant="outline" size="sm">
-              Find nearest clinic
-            </Button>
+            </Link>
           </div>
         </div>
       </div>

@@ -48,6 +48,49 @@ export function pickFallbackReply(turnIndex: number): string {
   return FALLBACK_REPLIES[i];
 }
 
+export interface SessionSummaryInput {
+  userMessageCount: number;
+  escalated: boolean;
+  reasons: string[];
+}
+
+export interface SessionSummary {
+  title: string;
+  detail: string;
+}
+
+/**
+ * Build a SAFE, non-diagnostic summary of a closed check-in for the health
+ * timeline. It records WHAT HAPPENED, never what's wrong — no diagnosis, no
+ * advice. Escalation summaries are fixed wording and must never be sent to an
+ * LLM for "polish".
+ */
+export function buildSessionSummary(input: SessionSummaryInput): SessionSummary {
+  if (input.escalated) {
+    const flagged =
+      input.reasons.length > 0
+        ? ` (${input.reasons.join(", ").toLowerCase()})`
+        : "";
+    return {
+      title: "Companion flagged a concern",
+      detail: `During a check-in, your companion noticed something that needed a doctor's attention${flagged} and recommended connecting with a clinician.`,
+    };
+  }
+
+  if (input.userMessageCount === 0) {
+    return {
+      title: "Check-in opened",
+      detail: "You opened a check-in with your companion.",
+    };
+  }
+
+  return {
+    title: "Companion check-in",
+    detail:
+      "You checked in with your companion and talked through how your recovery is going.",
+  };
+}
+
 export interface CompanionReplyPlan {
   escalated: boolean;
   reasons: string[];

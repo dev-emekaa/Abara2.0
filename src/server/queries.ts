@@ -87,6 +87,8 @@ export async function getCompanionData() {
   ]);
   return {
     threadId: thread.id,
+    status: thread.status,
+    summary: thread.summary,
     messages,
     doctorName: consult?.doctorName ?? "your doctor",
     specialty: consult?.specialty ?? "General Practice",

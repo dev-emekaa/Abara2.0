@@ -8,7 +8,8 @@ export type TimelineEventType =
   | "FOLLOWUP"
   | "MEDICATION"
   | "CHECKIN"
-  | "TIP";
+  | "TIP"
+  | "COMPANION";
 
 export type ConsultationStatus = "COMPLETED" | "SCHEDULED" | "CANCELLED";
 

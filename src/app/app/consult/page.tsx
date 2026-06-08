@@ -1,4 +1,4 @@
-import { Stethoscope, Video, CreditCard, Info } from "lucide-react";
+import { Stethoscope, Video, CreditCard, Info, ShieldAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,17 @@ const DOCTORS = [
   { name: "Dr. Amara Nwosu", specialty: "Paediatrics", next: "Wed, 11:15am" },
 ];
 
-export default async function ConsultPage() {
-  const consultations = await getConsultations();
+export default async function ConsultPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const [consultations, sp] = await Promise.all([
+    getConsultations(),
+    searchParams,
+  ]);
+  const fromCompanion = sp.ref === "companion";
+
   return (
     <div className="space-y-6">
       <FadeUp>
@@ -30,6 +39,22 @@ export default async function ConsultPage() {
           here as a demo so you can see how it fits.
         </p>
       </FadeUp>
+
+      {/* Referral context when arriving from a companion escalation */}
+      {fromCompanion && (
+        <FadeUp>
+          <div className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-danger/40 bg-danger/8 p-5">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
+            <div className="text-sm leading-relaxed text-ink">
+              <p className="font-medium">Your Care Companion sent you here.</p>
+              <p className="mt-1 text-pretty text-ink-soft">
+                Something in your check-in needs a real doctor. Pick a clinician
+                below to connect — in the full app this booking would be live.
+              </p>
+            </div>
+          </div>
+        </FadeUp>
+      )}
 
       {/* Out-of-scope notice */}
       <FadeUp delay={0.05}>

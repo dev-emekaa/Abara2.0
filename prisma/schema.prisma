@@ -16,6 +16,12 @@ enum TimelineEventType {
   MEDICATION
   CHECKIN
   TIP
+  COMPANION
+}
+
+enum ThreadStatus {
+  OPEN
+  CLOSED
 }
 
 enum ConsultationStatus {
@@ -86,10 +92,14 @@ model TimelineEvent {
 }
 
 model CompanionThread {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   userId         String
   consultationId String?
-  createdAt      DateTime @default(now())
+  status         ThreadStatus @default(OPEN)
+  escalated      Boolean      @default(false)
+  summary        String?
+  createdAt      DateTime     @default(now())
+  closedAt       DateTime?
 
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   consultation Consultation?      @relation(fields: [consultationId], references: [id], onDelete: SetNull)

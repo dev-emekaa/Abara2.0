@@ -91,4 +91,27 @@ export async function* streamGeminiReply(
   );
 }
 
+/**
+ * One-shot, non-streaming generation for short tasks (e.g. polishing a summary).
+ * Returns null on any failure or when unconfigured, so callers fall back.
+ */
+export async function generateText(
+  prompt: string,
+  maxOutputTokens = 80,
+): Promise<string | null> {
+  if (!isGeminiConfigured()) return null;
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!.trim());
+    const model = genAI.getGenerativeModel({ model: getModelName() });
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens, temperature: 0.4 },
+    });
+    const text = result.response.text().trim();
+    return text.length > 0 ? text : null;
+  } catch {
+    return null;
+  }
+}
+
 export { GeminiError };

@@ -4,6 +4,7 @@ import {
   addUserMessage,
   addAiMessage,
   buildGeminiInputs,
+  closeThread,
 } from "@/server/services/companion-service";
 import { streamGeminiReply } from "@/lib/gemini";
 import { pickFallbackReply } from "@/services/companion";
@@ -47,11 +48,13 @@ export async function POST(req: NextRequest) {
         // SAFETY: guardrail short-circuits before any AI call.
         if (plan.escalated && plan.text) {
           await addAiMessage(threadId, plan.text, true);
+          // A red flag ends the check-in: close it and log it to the timeline.
+          await closeThread(user.id, threadId);
           send({ type: "escalate", reasons: plan.reasons });
           for (const tok of chunkText(plan.text)) {
             send({ type: "token", value: tok });
           }
-          send({ type: "done", escalated: true });
+          send({ type: "done", escalated: true, closed: true });
           controller.close();
           return;
         }

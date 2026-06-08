@@ -11,7 +11,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FadeUp, Stagger, Rise } from "@/components/motion/reveal";
 import { EnterDemoButton } from "@/features/auth/enter-demo-button";
-import { DEMO_CREDENTIALS } from "@/lib/demo";
 
 const FEATURES = [
   {
@@ -91,17 +90,6 @@ export default function LandingPage() {
                 Create your account
               </Link>
             </div>
-          </FadeUp>
-          <FadeUp delay={0.28}>
-            <p className="mt-4 text-sm text-ink-faint">
-              Just exploring? Tap{" "}
-              <span className="font-medium text-ink-soft">Enter as demo</span> —
-              or sign in with{" "}
-              <span className="font-medium text-ink-soft">
-                {DEMO_CREDENTIALS.email}
-              </span>{" "}
-              / {DEMO_CREDENTIALS.password}
-            </p>
           </FadeUp>
         </div>
 

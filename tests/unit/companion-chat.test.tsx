@@ -6,11 +6,19 @@ import {
 } from "@/features/care-companion/companion-chat";
 
 /**
- * The guardrail must surface in the UI: a red-flag message stops normal triage
- * and shows the "Connect with a doctor" escalation, disabling the composer.
- * Network calls are mocked — the client-side guardrail is deterministic and
- * does not depend on the server round-trip for the escalation UX.
+ * The guardrail must surface in the UI: a red-flag message stops normal triage,
+ * shows the "Connect with a doctor" escalation, removes the composer, and offers
+ * a fresh check-in. Network + server actions are mocked.
  */
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),
+}));
+
+jest.mock("@/server/actions/companion", () => ({
+  startSessionAction: jest.fn().mockResolvedValue({ ok: true, data: { threadId: "t2" } }),
+  closeSessionAction: jest.fn().mockResolvedValue({ ok: true, data: {} }),
+}));
 
 const OPENER: InitialMessage = {
   id: "m1",
@@ -21,12 +29,16 @@ const OPENER: InitialMessage = {
 
 function renderChat() {
   return render(
-    <CompanionChat threadId="t1" initialMessages={[OPENER]} />,
+    <CompanionChat
+      threadId="t1"
+      initialMessages={[OPENER]}
+      status="OPEN"
+      summary={null}
+    />,
   );
 }
 
 beforeAll(() => {
-  // No real network in tests; reject so the non-escalation path falls back.
   global.fetch = jest.fn(() =>
     Promise.reject(new Error("no network in test")),
   ) as unknown as typeof fetch;
@@ -40,7 +52,7 @@ describe("CompanionChat escalation", () => {
     expect(screen.getByText(/how are you feeling today/i)).toBeInTheDocument();
   });
 
-  it("escalates on a red-flag quick reply and locks the composer", async () => {
+  it("escalates on a red-flag quick reply, hides the composer, offers a new check-in", async () => {
     const user = userEvent.setup();
     renderChat();
 
@@ -53,10 +65,18 @@ describe("CompanionChat escalation", () => {
     expect(
       await screen.findByText(/let's get a doctor involved/i),
     ).toBeInTheDocument();
+    // CTA routes to the consult flow (it's a link now).
     expect(
-      screen.getByRole("button", { name: /connect with a doctor/i }),
+      screen.getByRole("link", { name: /connect with a doctor/i }),
     ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/connect with a doctor/i)).toBeDisabled();
+    // Composer is removed once the session is closed…
+    expect(
+      screen.queryByPlaceholderText(/type how you're feeling/i),
+    ).not.toBeInTheDocument();
+    // …and a fresh check-in is offered.
+    expect(
+      screen.getByRole("button", { name: /start a new check-in/i }),
+    ).toBeInTheDocument();
   });
 
   it("does not escalate on an ordinary reply", async () => {
@@ -70,5 +90,22 @@ describe("CompanionChat escalation", () => {
     expect(
       screen.queryByText(/let's get a doctor involved/i),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("CompanionChat closed state", () => {
+  it("shows the wrap-up summary and a start-new button when closed", () => {
+    render(
+      <CompanionChat
+        threadId="t1"
+        initialMessages={[OPENER]}
+        status="CLOSED"
+        summary="You checked in and talked through your recovery."
+      />,
+    );
+    expect(screen.getByText(/check-in wrapped up/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /start a new check-in/i }),
+    ).toBeInTheDocument();
   });
 });

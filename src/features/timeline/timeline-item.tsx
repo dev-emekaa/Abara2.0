@@ -6,6 +6,7 @@ import {
   HeartPulse,
   Lightbulb,
   CalendarClock,
+  MessageCircleHeart,
   type LucideIcon,
 } from "lucide-react";
 import { Rise } from "@/components/motion/reveal";
@@ -46,6 +47,12 @@ const TYPE_META: Record<
     ring: "bg-ink-soft text-white",
     chip: "text-ink-soft",
     label: "Follow-up",
+  },
+  COMPANION: {
+    icon: MessageCircleHeart,
+    ring: "bg-teal-600 text-white",
+    chip: "text-teal-700",
+    label: "Companion",
   },
 };
 

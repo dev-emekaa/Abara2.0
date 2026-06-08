@@ -3,6 +3,7 @@ import {
   pickFallbackReply,
   buildSystemPrompt,
   buildOpenerText,
+  buildSessionSummary,
   FALLBACK_REPLIES,
 } from "@/services/companion";
 
@@ -33,6 +34,38 @@ describe("pickFallbackReply", () => {
     for (let i = 0; i < 10; i++) {
       expect(FALLBACK_REPLIES).toContain(pickFallbackReply(i));
     }
+  });
+});
+
+describe("buildSessionSummary", () => {
+  it("summarizes a normal check-in without diagnosis or advice", () => {
+    const s = buildSessionSummary({
+      userMessageCount: 2,
+      escalated: false,
+      reasons: [],
+    });
+    expect(s.title).toMatch(/check-in/i);
+    expect(s.detail).not.toMatch(/diagnos|prescrib|you have|you should take/i);
+  });
+
+  it("records an escalation factually with the flagged reasons", () => {
+    const s = buildSessionSummary({
+      userMessageCount: 1,
+      escalated: true,
+      reasons: ["Chest pain"],
+    });
+    expect(s.title).toMatch(/flagged a concern/i);
+    expect(s.detail.toLowerCase()).toContain("chest pain");
+    expect(s.detail).toMatch(/doctor|clinician/i);
+  });
+
+  it("handles an empty check-in", () => {
+    const s = buildSessionSummary({
+      userMessageCount: 0,
+      escalated: false,
+      reasons: [],
+    });
+    expect(s.title).toMatch(/opened/i);
   });
 });
 
