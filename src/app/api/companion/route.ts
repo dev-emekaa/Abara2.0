@@ -92,7 +92,12 @@ export async function POST(req: NextRequest) {
             full += tok;
             send({ type: "token", value: tok });
           }
-        } catch {
+        } catch (err) {
+          // Surface WHY we fell back (bad key, retired model, quota) in logs.
+          console.error(
+            "[companion] AI unavailable, using fallback:",
+            err instanceof Error ? err.message : err,
+          );
           const aiCount = await prisma.companionMessage.count({
             where: { threadId, role: "AI" },
           });
