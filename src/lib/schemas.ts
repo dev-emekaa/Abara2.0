@@ -35,8 +35,23 @@ export type LoginInput = z.infer<typeof loginSchema>;
 
 /** A message sent to the Care Companion. */
 export const companionMessageSchema = z.object({
-  threadId: z.string().min(1),
+  threadId: z.string().min(1).optional(),
   content: z.string().min(1, "Say something").max(2000),
 });
 
 export type CompanionMessageInput = z.infer<typeof companionMessageSchema>;
+
+/** Timeline "log how I'm feeling" check-in. */
+export const checkInSchema = z.object({
+  mood: z.enum(["better", "same", "worse"]),
+});
+
+export type CheckInInput = z.infer<typeof checkInSchema>;
+
+/** Nudge status transition. */
+export const nudgeStatusSchema = z.object({
+  nudgeId: z.string().min(1),
+  status: z.enum(["SEEN", "ACTED"]),
+});
+
+export type NudgeStatusInput = z.infer<typeof nudgeStatusSchema>;

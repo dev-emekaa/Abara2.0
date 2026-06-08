@@ -1,0 +1,136 @@
+// Abara data model — the retention layer.
+// Booking/payments/video are out of scope; consultations here are historical.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TimelineEventType {
+  CONSULT
+  FOLLOWUP
+  MEDICATION
+  CHECKIN
+  TIP
+}
+
+enum ConsultationStatus {
+  COMPLETED
+  SCHEDULED
+  CANCELLED
+}
+
+enum CompanionRole {
+  USER
+  AI
+  SYSTEM
+}
+
+enum NudgeKind {
+  FOLLOWUP
+  MEDICATION
+  SEASONAL
+}
+
+enum NudgeStatus {
+  PENDING
+  SEEN
+  ACTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  location     String
+  createdAt    DateTime @default(now())
+
+  consultations Consultation[]
+  timeline      TimelineEvent[]
+  threads       CompanionThread[]
+  streak        Streak?
+  nudges        Nudge[]
+}
+
+model Consultation {
+  id         String             @id @default(cuid())
+  userId     String
+  doctorName String
+  specialty  String
+  summary    String
+  status     ConsultationStatus @default(COMPLETED)
+  createdAt  DateTime           @default(now())
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  threads CompanionThread[]
+
+  @@index([userId])
+}
+
+model TimelineEvent {
+  id         String            @id @default(cuid())
+  userId     String
+  type       TimelineEventType
+  title      String
+  detail     String
+  occurredAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, occurredAt])
+}
+
+model CompanionThread {
+  id             String   @id @default(cuid())
+  userId         String
+  consultationId String?
+  createdAt      DateTime @default(now())
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consultation Consultation?      @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  messages     CompanionMessage[]
+
+  @@index([userId])
+}
+
+model CompanionMessage {
+  id        String        @id @default(cuid())
+  threadId  String
+  role      CompanionRole
+  content   String
+  escalated Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  thread CompanionThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+}
+
+model Streak {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  count           Int       @default(0)
+  lastCheckInDate DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Nudge {
+  id        String      @id @default(cuid())
+  userId    String
+  kind      NudgeKind
+  title     String
+  body      String
+  deepLink  String
+  status    NudgeStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}

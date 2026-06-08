@@ -12,11 +12,12 @@ const createJestConfig = nextJest({ dir: "./" });
  */
 const baseConfig: Config = {
   moduleNameMapper: {
+    "^server-only$": "<rootDir>/tests/stubs/server-only.ts",
     "^@/(.*)$": "<rootDir>/src/$1",
   },
 };
 
-export default async (): Promise<Config> => {
+const buildConfig = async (): Promise<Config> => {
   const unit = await createJestConfig({
     ...baseConfig,
     displayName: "unit",
@@ -35,3 +36,5 @@ export default async (): Promise<Config> => {
 
   return { projects: [unit, integration] };
 };
+
+export default buildConfig;
